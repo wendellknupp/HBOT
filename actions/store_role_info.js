@@ -24,7 +24,7 @@ section: "Role Control",
 
 subtitle: function(data) {
 	const roles = ['Mentioned Role', '1st Author Role', '1st Server Role', 'Temp Variable', 'Server Variable', 'Global Variable'];
-	const info = ['Role Object', 'Role ID', 'Role Name', 'Role Color', 'Role Position', 'Role Timestamp', 'Role Is Mentionable?', 'Role Is Separate From Others?', 'Role Is Managed?', 'Role Member List']
+	const info = ['Role Object', 'Role ID', 'Role Name', 'Role Color', 'Role Position', 'Role Timestamp', 'Role Is Mentionable?', 'Role Is Separate From Others?', 'Role Is Managed?', 'Role Member List', 'Role Creation Date', 'Role Permissions']
 	return `${roles[parseInt(data.role)]} - ${info[parseInt(data.info)]}`;
 },
 
@@ -37,10 +37,10 @@ subtitle: function(data) {
 //---------------------------------------------------------------------
 
 // Who made the mod (If not set, defaults to "DBM Mods")
-author: "DBM & Lasse",
+author: "DBM, Lasse and Cap",
 
 // The version of the mod (Defaults to 1.0.0)
-version: "1.9.2", //Added in 1.9.2
+version: "1.9.6", //Added in 1.9.2
 
 // A short description to show on the mod line for this mod (Must be on a single line)
 short_description: "More options for default DBM action.",
@@ -86,6 +86,12 @@ variableStorage: function(data, varType) {
 		case 9:
 			dataType = 'Member List';
 			break;
+		case 10:
+		    dataType = 'Date';
+			break;
+		case 11:
+		   dataType = 'Number';
+		   break;
 	}
 	return ([data.varName2, dataType]);
 },
@@ -140,7 +146,9 @@ html: function(isEvent, data) {
 			<option value="2">Role Name</option>
 			<option value="3">Role Color</option>
 			<option value="4">Role Position</option>
+			<option value="10">Role Creation Date</option>
 			<option value="5">Role Timestamp</option>
+			<option value="11">Role Permissions</option>
 			<option value="9">Role Members</option>
 			<option value="6">Role Is Mentionable?</option>
 			<option value="7">Role Is Separate From Others?</option>
@@ -226,6 +234,12 @@ action: function(cache) {
 		case 9:
 			result = targetRole.members.array();
 			break;
+		case 10:
+		    result = targetRole.createdAt;
+			break;
+		case 11:
+		   result = targetRole.permissions;
+		   break;
 		default:
 			break;
 	}

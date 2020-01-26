@@ -125,7 +125,12 @@ action: function(cache) {
 	const server = cache.server;
 	let source;
 	const channel = parseInt(data.channel);
-	const msg = cache.msg;
+	if (typeof cache.msg === "undefined") {
+		var msgid = "";
+	} else {
+		const msg = cache.msg;
+		var msgid = msg.id;
+	}
 	const varName = this.evalMessage(data.varName, cache);
 	switch(channel) {
 		case 0:
@@ -157,7 +162,7 @@ action: function(cache) {
 	}
 	if(source && source.fetchMessages) {
 		const count = Math.min(parseInt(this.evalMessage(data.count, cache)), 100);
-		source.fetchMessages({limit: count, before: msg.id}).then(function(messages) {
+		source.fetchMessages({limit: count, before: msgid}).then(function(messages) {
 			const condition = parseInt(data.condition);
 			if(condition === 1) {
 				let author;

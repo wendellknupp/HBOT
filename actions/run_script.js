@@ -37,10 +37,10 @@ subtitle: function(data) {
 author: "DBM & MrGold",
 
 // The version of the mod (Defaults to 1.0.0)
-version: "1.9.5", //Added in 1.9.5
+version: "1.9.6", //Added in 1.9.6
 
 // A short description to show on the mod line for this mod (Must be on a single line)
-short_description: "Runs a Script",
+short_description: "Runs a JavaScript Script",
 
 // If it depends on any other mods by name, ex: WrexMODS if the mod uses something from WrexMods
 
@@ -126,13 +126,18 @@ fields: ["code", "behavior", "interpretation", "storage", "varName", "VTypeSelec
 
 html: function(isEvent, data) {
 	return `
-	<div id ="wrexdiv" style="width: 570px; height: 359px; overflow-y: scroll;">
-		<iframe id="JSEditor" src="" style="width: 562px; height: 320px; border: 1px solid white;" frameBorder="0"></iframe>
-		<textarea id="code" style="display: none;"></textarea>
-		<div style="width: 562px; height: 39px; background-color: #161616; margin-top: -4px;">
-            <button class="_button">Save</button>
+	<div id ="wrexdiv" style="width: 570px; height: 359px; overflow-x: hidden;">
+
+		<div style="width: 100%; height: 324px;">
+			<iframe id="JSEditor" style="visibility: hidden; width: 100%; height: 320px;" frameBorder="0"></iframe>
+			<textarea id="code" name="is-eval" style="display: none; width: 100%; height: 320px; white-space: nowrap; resize: none;"></textarea>
+		</div>
+		<div style="width: 100%; height: 39px; background-color: #161616; margin-top: -4px; user-select: none;">
+		    <button class="RS_button" onclick="glob.onClickDefault(this)">Default</button>
+            <span style="font-family:Verdana, Geneva, sans-serif; opacity: .3; font-size: 20px; color: white; position: relative; top: 2px; left: 3px;">Run Script V2</span><br>
+            <span style="font-family:Verdana, Geneva, sans-serif; opacity: .2; font-size: 11.9px; color: white; position: relative; top: -1px; left: 4px;">Modification by MrGold</span>
         </div>
-		
+
 		<div style="padding-left: 17px; padding-top: 17px;">
 		    <div>
 		        <div style="float: left; width: 257px;">
@@ -195,8 +200,8 @@ html: function(isEvent, data) {
             margin: 0 !important;
             padding: 0px !important;
 		}
-		
-		._button {
+
+		.RS_button {
 			float: right;
 			border: none;
 			outline: 0;
@@ -204,64 +209,37 @@ html: function(isEvent, data) {
 			width: 100px;
 			font-size: 25px;
 			font-family: Arial;
-			background-color: #404447;
+			background-color: #2d2d2d;
 			color: white;
 			transition: background-color .1s;
 			cursor: pointer;
 		}
-		._button:hover {
+		.RS_button:hover {
+			background-color: #3b3c3d;
+		}
+
+        .RS_button:active {
 			background-color: #404142;
-	    }
-	    ._button:active {
-			background-color: green;
 	    }
 	</style>`
 },
 
 //---------------------------------------------------------------------
-// Action Editor Init Code
+// JavaScript Editor
 //
-// When the HTML is first applied to the action editor, this code
-// is also run. This helps add modifications or setup reactionary
-// functions for the DOM elements.
+// by: MrGold
+// Powered by Ace
 //---------------------------------------------------------------------
 
 init: function() {
 	const {glob, document} = this;
 
-	glob.onChangeVTypeSelect1 = function() {
-		if(document.getElementById("storage").value === "0") {
-			document.getElementById("VTypeDiv").style.display = 'none';
-		} else {
-			document.getElementById("VTypeDiv").style.display = null;
-		}
-	};
-
-	glob.onChangeVTypeSelect2 = function(element) {
-		if(element.value === "11") {
-			document.getElementById("CVTypeDiv").style.display = null;
-		} else {
-			document.getElementById("CVTypeDiv").style.display = 'none';
-		}
-	};
-
-	glob.onChangeVTypeSelect1();
-	glob.onChangeVTypeSelect2(document.getElementById('VTypeSelect'));
-	glob.variableChange(document.getElementById('storage'), 'varNameContainer');
-
-
-	//---------------------------------------------------------------------
-    // JavaScript Editor
-    //
-	// by: MrGold
-	// Powered by Ace
-    //---------------------------------------------------------------------
 	document.getElementById("JSEditor").src = "data:text/html," + `
 	<script src="https://cdnjs.cloudflare.com/ajax/libs/ace/1.4.3/ace.js" integrity="sha256-gkWBmkjy/8e1QUz5tv4CCYgEtjR8sRlGiXsMeebVeUo=" crossorigin="anonymous"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/ace/1.4.3/ext-language_tools.js" integrity="sha256-PAtX04Rk2WBELn+z4CmyvM2E5bhFBNEplF8mrHBvMJc=" crossorigin="anonymous"></script>
 
 	<div id="editor"></div>
-	<div id="hideCode" style="display: none;"></div>
+	<textarea id="hideCode" style="display: none;"></textarea>
 
 	<script>
 	    var editor = ace.edit("editor", {
@@ -277,11 +255,11 @@ init: function() {
 		});
 
 		document.getElementById("hideCode").addEventListener("_load", function() {
-			editor.session.setValue(document.getElementById("hideCode").innerHTML);
+			editor.session.setValue(document.getElementById("hideCode").value);
 		});
 
 		editor.session.on('change', function() {
-			document.getElementById("hideCode").innerHTML = editor.getValue();
+			document.getElementById("hideCode").value = editor.getValue();
 		});
 	</script>
 
@@ -292,6 +270,7 @@ init: function() {
 			left: 0;
 			right: 0;
 			bottom: 0;
+			font-size: 12.1px;
 		}
 
 		::-webkit-scrollbar {
@@ -312,16 +291,68 @@ init: function() {
         }
 	</style>`;
 
-	if(document.getElementById("code").value) {
-	    document.getElementById("JSEditor").addEventListener("load", function() {
-		    this.contentWindow.document.getElementById("hideCode").innerHTML = document.getElementById("code").value;
-		    this.contentWindow.document.getElementById("hideCode").dispatchEvent(new Event('_load'));
-		})
-	}
-
-	document.getElementsByClassName("_button")[0].addEventListener("click", function() {
-		document.getElementById("code").value = document.getElementById("JSEditor").contentWindow.document.getElementById("hideCode").innerHTML;
+	document.getElementById("JSEditor").addEventListener("load", function() {
+		if(document.getElementById("code").value) {
+		    this.contentWindow.document.getElementById("hideCode").value = document.getElementById("code").value;
+			this.contentWindow.document.getElementById("hideCode").dispatchEvent(new Event('_load'));
+		}
+		this.style.visibility = "visible";
 	})
+	
+	document.getElementById("code").addEventListener("input", function() {
+		document.getElementById("JSEditor").contentWindow.document.getElementById("hideCode").value = document.getElementById("code").value;
+		document.getElementById("JSEditor").contentWindow.document.getElementById("hideCode").dispatchEvent(new Event('_load'));
+	})
+
+	document.getElementById("createAction").setAttribute("onclick", 'if(document.getElementById("JSEditor").contentWindow.document.getElementById("hideCode").value) document.getElementById("code").value = document.getElementById("JSEditor").contentWindow.document.getElementById("hideCode").value; finish()');
+
+//---------------------------------------------------------------------
+// Action Editor Init Code
+//
+// When the HTML is first applied to the action editor, this code
+// is also run. This helps add modifications or setup reactionary
+// functions for the DOM elements.
+//---------------------------------------------------------------------
+
+	glob.onChangeVTypeSelect1 = function() {
+		if(document.getElementById("storage").value === "0") {
+			document.getElementById("VTypeDiv").style.display = 'none';
+		} else {
+			document.getElementById("VTypeDiv").style.display = null;
+		}
+	};
+
+	glob.onChangeVTypeSelect2 = function(element) {
+		if(element.value === "11") {
+			document.getElementById("CVTypeDiv").style.display = null;
+		} else {
+			document.getElementById("CVTypeDiv").style.display = 'none';
+		}
+	};
+
+	glob.onClickDefault = function(element) {
+		if(document.getElementById("code").style.display == "none") {
+			element.innerHTML = "Back";
+
+			document.getElementById("code").value = document.getElementById("JSEditor").contentWindow.document.getElementById("hideCode").value;
+
+			document.getElementById("code").style.display = "initial"
+			document.getElementById("JSEditor").style.display = "none"
+		} else {
+			element.innerHTML = "Default";
+
+			document.getElementById("JSEditor").contentWindow.document.getElementById("hideCode").value = document.getElementById("code").value;
+			document.getElementById("JSEditor").contentWindow.document.getElementById("hideCode").dispatchEvent(new Event('_load'));
+			
+			document.getElementById("code").style.display = "none"
+			document.getElementById("JSEditor").style.display = "initial"
+		}
+	};
+
+	glob.onChangeVTypeSelect1();
+	glob.onClickDefault();
+	glob.onChangeVTypeSelect2(document.getElementById('VTypeSelect'));
+	glob.variableChange(document.getElementById('storage'), 'varNameContainer');
 },
 
 //---------------------------------------------------------------------
@@ -347,6 +378,8 @@ action: function(cache) {
 	    const varName = this.evalMessage(data.varName, cache);
 		const storage = parseInt(data.storage);
 		this.storeValue(result, storage, varName, cache);
+	} else {
+		this.eval(code, cache);
 	}
 	if(data.behavior === "0") {
 		this.callNextAction(cache);
